@@ -15,8 +15,6 @@ class JokeAdapter : ListAdapter<JokesEntity, JokeAdapter.JokeViewHolder>(Compara
         RecyclerView.ViewHolder(binding.root) {
         fun bind(jokes: JokesEntity) {
             binding.desc.text = jokes.joke
-            binding.title.text = "Joke"
-
         }
     }
 
