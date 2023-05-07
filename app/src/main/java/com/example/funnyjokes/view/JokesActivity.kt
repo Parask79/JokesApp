@@ -3,10 +3,12 @@ package com.example.funnyjokes.view
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.funnyjokes.databinding.ActivityJokesBinding
 import com.example.funnyjokes.utils.NetworkResult
 import com.example.funnyjokes.viewmodel.JokeViewModel
+import kotlinx.coroutines.cancel
 import org.koin.android.ext.android.inject
 
 
@@ -48,5 +50,11 @@ class JokesActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+        viewModel.coroutineScope.cancel()
     }
 }
