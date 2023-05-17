@@ -2,8 +2,9 @@ package com.example.funnyjokes.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import android.widget.Toast
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.funnyjokes.databinding.ActivityJokesBinding
 import com.example.funnyjokes.utils.NetworkResult
@@ -19,7 +20,6 @@ class JokesActivity : AppCompatActivity() {
     private var _binding: ActivityJokesBinding? = null
     private val binding get() = _binding!!
     private lateinit var _adapter: JokeAdapter
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,17 +39,25 @@ class JokesActivity : AppCompatActivity() {
     }
 
     private fun observeData() {
+
         viewModel.liveData.observe(this) {
+            binding.progressDialog.visibility = View.GONE
             when (it) {
                 is NetworkResult.Error -> {
                     Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
                 }
-                is NetworkResult.Loading -> {}
+                is NetworkResult.Loading -> {binding.progressDialog.visibility = View.VISIBLE}
                 is NetworkResult.Success -> {
-                    _adapter.submitList(it.data)
+                    viewModel.liveDataDao.observe(this){jokesList ->
+                        _adapter.submitList(jokesList)
+                    }
                 }
             }
         }
+
+
+
+
     }
 
     override fun onDestroy() {

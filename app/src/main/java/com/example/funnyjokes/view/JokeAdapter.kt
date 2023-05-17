@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.funnyjokes.databinding.JokeItemBinding
 import com.example.funnyjokes.models.JokesEntity
+import com.example.funnyjokes.models.JokesResponse
 
 
 class JokeAdapter : ListAdapter<JokesEntity, JokeAdapter.JokeViewHolder>(ComparatorDiffUtil()) {

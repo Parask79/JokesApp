@@ -1,40 +1,36 @@
 package com.example.funnyjokes.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.example.funnyjokes.JokesDatabase
 import com.example.funnyjokes.api.JokeAPI
+import com.example.funnyjokes.base.BaseRepo
 import com.example.funnyjokes.models.JokesEntity
+import com.example.funnyjokes.models.JokesResponse
 import com.example.funnyjokes.utils.NetworkResult
+import kotlinx.coroutines.Dispatchers
+
 
 class JokeRepositoryImpl(private val jokeAPI: JokeAPI, private val database: JokesDatabase) :
-    JokeRepository {
+    JokeRepository, BaseRepo() {
 
-    private val _mutableLiveData = MutableLiveData<NetworkResult<List<JokesEntity>>>()
 
-    override suspend fun getJokes() {
-        val response = jokeAPI.getJokes()
-        _mutableLiveData.postValue(NetworkResult.Loading())
-        if (response.isSuccessful && response.body() != null) {
+
+    override suspend fun getJokes(): NetworkResult<JokesResponse>{
+        val response:NetworkResult<JokesResponse> = safeCall(Dispatchers.IO) {
+            jokeAPI.getJokes()
+        }
+        response.data?.let {
             if (database.jokeDao().getID() >= 10) {
                 database.jokeDao().deleteID()
             }
-            database.jokeDao().insertJoke(JokesEntity(0, response.body()!!.joke))
-
-            database.jokeDao().getJokes().observeForever()
-            {
-                it?.let {
-                    _mutableLiveData.postValue(NetworkResult.Success(it))
-                }
-            }
-
-        } else if (response.errorBody() != null) {
-            _mutableLiveData.postValue(NetworkResult.Error("Something Went wrong"))
+            database.jokeDao().insertJoke(JokesEntity(0, it.joke))
         }
-
+        return response
     }
 
-    override fun getLiveData(): LiveData<NetworkResult<List<JokesEntity>>> {
-        return _mutableLiveData
+    override fun getJokesDao(): LiveData<List<JokesEntity>> {
+        return  database.jokeDao().getJokes()
     }
+
+
 }
